@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image, ImageDraw
 import base64
 from io import BytesIO
+from streamlit_option_menu import option_menu
 
 # ✅ Page Config
 st.set_page_config(
@@ -40,6 +41,27 @@ def make_circle(image, new_size=(200, 200)):
     return circular_img
 
 circular_image = make_circle(img)
+
+# Function to display social icons
+def social_icons(width=24, height=24, **kwargs):
+    icon_template = '''
+    <a href="{url}" target="_blank" style="margin-right: 10px;">
+        <img src="{icon_src}" alt="{alt_text}" width="{width}" height="{height}">
+    </a>
+    '''
+
+    icons_html = ""
+    for name, url in kwargs.items():
+        icon_src = {
+            "linkedin": "https://cdn-icons-png.flaticon.com/512/174/174857.png",
+            "github": "https://cdn-icons-png.flaticon.com/512/25/25231.png",
+            "email": "https://cdn-icons-png.flaticon.com/512/561/561127.png"
+        }.get(name.lower())
+
+        if icon_src:
+            icons_html += icon_template.format(url=url, icon_src=icon_src, alt_text=name.capitalize(), width=width, height=height)
+
+    return icons_html
 
 # ✅ Sidebar toggle state
 if "show_contact" not in st.session_state:
@@ -99,8 +121,10 @@ if st.session_state.show_contact:
     st.sidebar.write(f"📧 Email: {email}")
     st.sidebar.write(f"📞 Phone: {phone}")
     st.sidebar.write(f"📍 Address: {address}")
-    st.sidebar.write(f"🔗 [LinkedIn]({linkedin})")
-    st.sidebar.write(f"💻 [GitHub]({github})")
+    
+    # Social icons in the sidebar
+    st.sidebar.markdown(social_icons(32, 32, LinkedIn=linkedin, GitHub=github, Email=f"mailto:{email}"), unsafe_allow_html=True)
+
 
 # ✅ CV Download
 try:
@@ -114,7 +138,7 @@ except FileNotFoundError:
     st.warning("⚠️ Fichier 'resume.pdf' introuvable. Ajoutez-le au dossier pour activer le bouton de téléchargement.")
 
 # ✅ Navigation Tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎓 Éducation", "🚀 Compétences", "📂 Projets", "📜 Certifications", "💡 Intérêts"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🎓 Éducation", "🚀 Compétences", "📂 Projets", "📜 Certifications", "💡 Intérêts","Contact"])
 
 with tab1:
     st.header("🎓 Mon parcours académique")
@@ -182,6 +206,37 @@ with tab5:
     - 🔬 Deep Learning  
     - 💾 Big Data  
     """)
+
+# Content for each tab
+with tab6:
+    # Use local CSS
+    def local_css(file_name):
+        with open(file_name) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+    local_css(r"C:\Users\user\Downloads\Projet ML\pages\style\style.css")
+    #
+    st.write("---")
+    st.header("Get In Touch With Me!")
+    st.write("##")
+
+    # Documention: https://formsubmit.co/ !!! CHANGE EMAIL ADDRESS !!!
+    contact_form = """
+    <form action="https://formsubmit.co/michelsagesse16@gmail.com" method="POST">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="text" name="name" placeholder="Your name" required>
+        <input type="email" name="email" placeholder="Your email" required>
+        <textarea name="message" placeholder="Your message here" required></textarea>
+        <button type="submit">Send</button>
+    </form>
+    """
+    left_column, right_column = st.columns(2)
+    with left_column:
+        st.markdown(contact_form, unsafe_allow_html=True)
+    with right_column:
+        st.empty()
+    
+    
 
 # ✅ Footer
 st.markdown("---")
