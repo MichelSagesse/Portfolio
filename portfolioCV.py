@@ -208,13 +208,6 @@ with tab5:
 
 # Content for each tab
 with tab6:
-    # Use local CSS
-    def local_css(file_name):
-        with open(file_name) as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-    local_css(r"C:\Users\user\Downloads\Projet ML\pages\style\style.css")
-    #
     st.write("---")
     st.header("Get In Touch With Me!")
     st.write("##")
