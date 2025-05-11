@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image, ImageDraw
 import base64
 from io import BytesIO
-from streamlit_option_menu import option_menu
 
 # ✅ Page Config
 st.set_page_config(
