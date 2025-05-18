@@ -97,59 +97,74 @@ def social_icons(width=24, height=24, **kwargs):
 
     return icons_html
 
-# ✅ Hero Section
-st.markdown(f"""
-<div class="hero">
-    <div class="hero-content">
-        <div class="hero-text">
-            <h1>{name}</h1>
-            <h2>{title}</h2>
-            <div class="social-icons">
-                {social_icons(32, 32, LinkedIn=linkedin, GitHub=github, Email=f"mailto:{email}", Phone=f"tel:{phone}")}
-            </div>
-        </div>
-        <div class="hero-image">
-            <img src="{profile_img}" alt="Profile Picture">
-        </div>
+# ✅ Hero Section (version Streamlit native)
+col1, col2 = st.columns([3, 2], gap="large")
+
+with col1:
+    st.title(name)
+    st.markdown(f"#### {title}")
+    
+    # Social icons
+    st.markdown("""
+    <div style="display: flex; gap: 15px; margin-top: 20px;">
+        <a href="{linkedin}" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="32">
+        </a>
+        <a href="{github}" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" width="32">
+        </a>
+        <a href="mailto:{email}">
+            <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" width="32">
+        </a>
+        <a href="tel:{phone}">
+            <img src="https://cdn-icons-png.flaticon.com/512/126/126341.png" width="32">
+        </a>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """.format(linkedin=linkedin, github=github, email=email, phone=phone), 
+    unsafe_allow_html=True)
+
+with col2:
+    if profile_img:
+        st.image(profile_img, width=200)
+
+# Ligne de séparation stylisée
+st.markdown("---")
 
 # ✅ Navigation Tabs
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 Accueil", "🎓 Éducation", "🚀 Compétences", "📂 Projets", "📜 Certifications", "📩 Contact"])
 
 with tab1:
     st.header("👋 Bienvenue sur mon Portfolio")
-    st.markdown("""
-    <div class="welcome-section">
-        <p>Je suis un ingénieur en Data Science et Intelligence Artificielle passionné par la résolution de problèmes complexes grâce à la puissance des données.</p>
-        
-        <div class="highlights">
-            <div class="highlight-card">
-                <h3>📈 Data Science</h3>
-                <p>Analyse et modélisation de données pour extraire des insights précieux</p>
-            </div>
-            <div class="highlight-card">
-                <h3>🤖 IA & ML</h3>
-                <p>Développement de modèles d'apprentissage automatique et deep learning</p>
-            </div>
-            <div class="highlight-card">
-                <h3>💾 Big Data</h3>
-                <p>Traitement et analyse de volumes massifs de données</p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.write("Je suis un élève ingénieur en Data Science, Big data et Intelligence Artificielle passionné par la résolution de problèmes complexes grâce à la puissance des données.")
+    
+    # Cartes de compétences clés
+    cols = st.columns(3)
+    with cols[0]:
+        with st.container(border=True):
+            st.markdown("### 📈 Data Science")
+            st.write("Analyse et modélisation de données pour extraire des insights précieux")
+    
+    with cols[1]:
+        with st.container(border=True):
+            st.markdown("### 🤖 IA & ML")
+            st.write("Développement de modèles d'apprentissage automatique et deep learning")
+    
+    with cols[2]:
+        with st.container(border=True):
+            st.markdown("### 💾 Big Data")
+            st.write("Traitement et analyse de volumes massifs de données")
     
     # CV Download
     try:
         with open("resume.pdf", "rb") as pdf_file:
             PDFbyte = pdf_file.read()
-        st.download_button(label="📄 Télécharger mon CV complet",
-                         data=PDFbyte,
-                         file_name="MICHEL_SAGESSE_KOLIE_CV.pdf",
-                         mime='application/pdf',
-                         use_container_width=True)
+        st.download_button(
+            label="📄 Télécharger mon CV complet",
+            data=PDFbyte,
+            file_name="MICHEL_SAGESSE_KOLIE_CV.pdf",
+            mime='application/pdf',
+            use_container_width=True
+        )
     except FileNotFoundError:
         st.warning("⚠️ Fichier 'resume.pdf' introuvable.")
 
