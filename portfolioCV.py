@@ -1,69 +1,265 @@
 import streamlit as st
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 import base64
 from io import BytesIO
+import time
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
+import numpy as np
 import os
 
-# Configuration de base
+# ===== CONFIGURATION DE LA PAGE =====
 st.set_page_config(
-    page_title="Portfolio Michel Sagesse",
+    page_title="📄Portfolio",
     page_icon="",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://github.com/MichelSagesse',
+        'Report a bug': "mailto:michelsagesse16@gmail.com",
+        'About': "# Portfolio Michel Sagesse Kolié\nData Scientist & AI Engineer"
+    }
 )
 
-# Données du portfolio (texte simple sans caractères spéciaux)
+# ===== GESTION DU MODE SOMBRE =====
+def init_dark_mode():
+    """Initialise le mode sombre dans la session"""
+    if 'dark_mode' not in st.session_state:
+        st.session_state.dark_mode = False
+
+def toggle_dark_mode():
+    """Bascule le mode sombre"""
+    st.session_state.dark_mode = not st.session_state.dark_mode
+
+def get_dark_mode_css():
+    """Retourne le CSS pour le mode sombre"""
+    if st.session_state.dark_mode:
+        return """
+        <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-card: #2d3748;
+            --border-color: #4a5568;
+            --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stApp {
+            background-color: var(--bg-primary) !important;
+        }
+        
+        .main .block-container {
+            background-color: var(--bg-primary) !important;
+        }
+        
+        .stTabs [data-baseweb="tab-list"] {
+            background-color: var(--bg-secondary) !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .stSelectbox > div > div {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        .stExpander > div > div {
+            background-color: var(--bg-card) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        .stButton > button {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        
+        .stMetric > div > div {
+            color: var(--text-primary) !important;
+        }
+        
+        .stMarkdown {
+            color: var(--text-primary) !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary) !important;
+        }
+        
+        p {
+            color: var(--text-secondary) !important;
+        }
+        
+        .stSidebar {
+            background-color: var(--bg-secondary) !important;
+        }
+        
+        .stSidebar .sidebar-content {
+            background-color: var(--bg-secondary) !important;
+        }
+        
+        .stSidebar .sidebar-content > div {
+            color: var(--text-primary) !important;
+        }
+        </style>
+        """
+    return ""
+
+# ===== CHARGEMENT CSS =====
+def load_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css("style.css")
+
+# ===== INITIALISATION =====
+init_dark_mode()
+
+# ===== FONCTIONS POUR LES VIDÉOS =====
+def get_video_path(project_title):
+    """Retourne le chemin de la vidéo pour un projet donné"""
+    # Mapping des noms de projets vers les noms de fichiers vidéo
+    video_mapping = {
+        "Heart Rate Prediction and Patient Monitoring System": "appmedical.mp4",
+        "Movie Recommendation System": ""
+    }
+
+    video_filename = video_mapping.get(project_title)
+    if video_filename and os.path.exists(video_filename):
+        return video_filename
+    return None
+
+def display_project_video(video_path):
+    """Affiche une vidéo de projet avec des contrôles personnalisés"""
+    if video_path and os.path.exists(video_path):
+        st.markdown(f"""
+        <div style="border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-medium);">
+            <video width="100%" controls style="border-radius: 12px;">
+                <source src="{video_path}" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture de vidéos.
+            </video>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; text-align: center; color: var(--text-secondary);">
+            <p>🎬 Video demonstration in preparation...</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ===== FONCTIONS POUR LES IMAGES DES CERTIFICATIONS =====
+def load_certification_image(image_name, size=(80, 80)):
+    """Charge et redimensionne une image de certification"""
+    try:
+        image_path = os.path.join("images", image_name)
+        if os.path.exists(image_path):
+            img = Image.open(image_path)
+            img = img.resize(size, Image.LANCZOS)
+            return f"data:image/png;base64,{image_to_base64(img)}"
+        return None
+    except Exception as e:
+        print(f"Erreur lors du chargement de l'image {image_name}: {e}")
+        return None
+
+def display_certification_image(image_path, alt_text, size=(80, 80)):
+    """Affiche une image de certification avec style"""
+    if image_path:
+        st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <img src="{image_path}" alt="{alt_text}" style="width: {size[0]}px; height: {size[1]}px; border-radius: 8px; box-shadow: var(--shadow-light);">
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        # Fallback avec une icône par défaut
+        st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <div style="width: {size[0]}px; height: {size[1]}px; background: var(--gradient-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: var(--shadow-light);">
+                <span style="font-size: 2rem;">📜</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ===== DONNÉES DU PORTFOLIO =====
 PORTFOLIO_DATA = {
-    "name": "MICHEL SAGESSE KOLIE",
-    "title": "Data Scientist AI Big Data Engineer",
-    "email": "michelsagesse16@gmail.com",
-    "phone": "212710871157",
-    "address": "Tetouan Morocco",
-    "linkedin": "https://www.linkedin.com/in/michel-sagesse-kolie-9313a9281/",
-    "github": "https://github.com/MichelSagesse",
-    "about": "Passionate about AI and Data Science I transform data into innovative solutions",
-    
-    "skills": {
-        "Python": 95,
-        "SQL": 90,
-        "R": 80,
-        "TensorFlow": 85,
-        "PyTorch": 80,
-        "Scikit learn": 90,
-        "Pandas": 95,
-        "NumPy": 90,
-        "Hadoop": 75,
-        "Spark": 80,
-        "MySQL": 90,
-        "PostgreSQL": 85,
-        "MongoDB": 80
+    "personal": {
+        "name": "MICHEL SAGESSE KOLIE",
+        "title": "Data Scientist AI Big Data Engineer",
+        "email": "michelsagesse16@gmail.com",
+        "phone": "212710871157",
+        "address": "Tetouan Morocco",
+        "linkedin": "https://www.linkedin.com/in/michel-sagesse-kolie-9313a9281/",
+        "github": "https://github.com/MichelSagesse",
+        "about": "Passionate about AI and Data Science I transform data into innovative solutions"
     },
-    
+    "skills": {
+        "programming": {
+            "Python": 95,
+            "SQL": 90,
+            "R": 80,
+            "C": 60,
+            "JavaScript": 70
+        },
+        "databases": {
+            "MySQL": 90,
+            "PostgreSQL": 85,
+            "MongoDB": 80,
+            "Redis": 75
+        },
+        "tools": {
+            "TensorFlow": 85,
+            "PyTorch": 80,
+            "Scikit-learn": 90,
+            "Pandas": 95,
+            "NumPy": 90,
+            "Hadoop": 75,
+            "Spark": 80,
+            "Kafka": 70
+        }
+    },
     "projects": [
         {
             "title": "Heart Rate Prediction and Patient Monitoring System",
             "description": "XGBoost algorithm estimates heart rate by filtering arm movement interferences through PPG and accelerometer signal comparison",
-            "technologies": "Python XGBoost PCA Sensors Pandas",
+            "image": "frequence_cardiaque.jpg",
+            "technologies": ["Python", "XGBoost", "PCA", "Sensors", "Pandas"],
+            "video": "appmedical.mp4",
             "category": "AI ML"
         },
         {
             "title": "Movie Recommendation System",
             "description": "Hybrid recommendation engine combining collaborative filtering and content based approaches",
-            "technologies": "Collaborative Filtering Content Based Pandas Scikit learn",
+            "image": "movie_recommendation.jpg",
+            "technologies": ["Collaborative Filtering", "Content Based", "Pandas", "Scikit learn"],
+            "video": "",
             "category": "Recommendation Systems"
         }
     ],
-    
     "experience": [
         {
             "title": "AI NLP Intern",
             "company": "Smart Automation Technologies",
             "period": "July 2025 August 2025",
             "description": "Development of intelligent multilingual translation assistant with automatic language detection",
-            "technologies": "Python Scikit learn Transformers Hugging Face NLP Langchain"
+            "technologies": ["Python", "Scikit learn", "Transformers", "Hugging Face", "NLP", "Langchain"]
         }
     ],
-    
     "education": [
         {
             "degree": "Engineering Cycle Data Science AI Big Data",
@@ -84,60 +280,68 @@ PORTFOLIO_DATA = {
             "description": "Diploma with high honors in sciences"
         }
     ],
-    
     "certifications": [
         {
             "title": "MLOps Concepts",
             "issuer": "DataCamp",
             "date": "2025",
-            "link": "https://www.datacamp.com/statement-of-accomplishment/course/24c0596b019268b75c8bee3a6aa3869f2420d7b1?raw=1"
+            "link": "https://www.datacamp.com/statement-of-accomplishment/course/24c0596b019268b75c8bee3a6aa3869f2420d7b1?raw=1",
+            "image": "mlops_datacamp.jpg"
         },
         {
             "title": "Understanding Cloud Computing",
             "issuer": "DataCamp",
             "date": "2025",
-            "link": "https://www.datacamp.com/completed/statement-of-accomplishment/course/c2c7770fb5a03701ed749850724f4af5a7412e49"
+            "link": "https://www.datacamp.com/completed/statement-of-accomplishment/course/c2c7770fb5a03701ed749850724f4af5a7412e49",
+            "image": "cloud_computing_datacamp.png"
         },
         {
             "title": "Cleaning Data with PySpark",
             "issuer": "DataCamp",
             "date": "2025",
-            "link": "https://www.datacamp.com/statement-of-accomplishment/course/893998791b120ac1ffd69bb7e87b057e152b80bd?raw=1"
+            "link": "https://www.datacamp.com/statement-of-accomplishment/course/893998791b120ac1ffd69bb7e87b057e152b80bd?raw=1",
+            "image": "cleaning.jpg"
         },
         {
             "title": "Feature Engineering with PySpark",
             "issuer": "DataCamp",
             "date": "2025",
-            "link": "https://www.datacamp.com/statement-of-accomplishment/course/0e2331ad3e6b1ab4876a821f1d879e8b6924f847?raw=1"
+            "link": "https://www.datacamp.com/statement-of-accomplishment/course/0e2331ad3e6b1ab4876a821f1d879e8b6924f847?raw=1",
+            "image": "feature_engineering.jpg"
         },
         {
             "title": "Introduction to Python",
             "issuer": "DataCamp",
             "date": "2025",
-            "link": "https://www.datacamp.com/statement-of-accomplishment/course/08591f150a4fdf0dcfd60c08cc63bee9d1d4ab8e?raw=1"
+            "link": "https://www.datacamp.com/statement-of-accomplishment/course/08591f150a4fdf0dcfd60c08cc63bee9d1d4ab8e?raw=1",
+            "image": "python.jpg"
         },
         {
             "title": "Big Data Fundamentals with PySpark",
             "issuer": "DataCamp",
             "date": "2025",
-            "link": "https://www.datacamp.com/statement-of-accomplishment/course/442a9465ee316fdb56192d9d9deeea9b7f267da0?raw=1"
+            "link": "https://www.datacamp.com/statement-of-accomplishment/course/442a9465ee316fdb56192d9d9deeea9b7f267da0?raw=1",
+            "image": "big_data_fundamentals.jpg"
         },
         {
             "title": "Introduction to PySpark",
             "issuer": "DataCamp",
             "date": "2025",
-            "link": "https://www.datacamp.com/statement-of-accomplishment/course/c7b2236fe5ba62d686704292ea016b3fcc2b1de8?raw=1"
+            "link": "https://www.datacamp.com/statement-of-accomplishment/course/c7b2236fe5ba62d686704292ea016b3fcc2b1de8?raw=1",
+            "image": "intropyspark.jpg"
         }
     ]
 }
 
-# Fonctions utilitaires
+# ===== FONCTIONS UTILITAIRES =====
 def image_to_base64(image):
+    """Convertit une image PIL en base64"""
     buffered = BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 def make_circle(image, new_size=(200, 200)):
+    """Crée une image circulaire"""
     size = min(image.size)
     mask = Image.new("L", (size, size), 0)
     draw = ImageDraw.Draw(mask)
@@ -148,209 +352,462 @@ def make_circle(image, new_size=(200, 200)):
     circular_img = circular_img.resize(new_size, Image.LANCZOS)
     return circular_img
 
-def load_profile_image():
+def load_image(path, size=(300, 200)):
+    """Charge et redimensionne une image"""
     try:
-        profile_img = Image.open("michel.jpeg")
-        circular_profile = make_circle(profile_img)
-        return f"data:image/png;base64,{image_to_base64(circular_profile)}"
+        img = Image.open(path)
+        img = img.resize(size, Image.LANCZOS)
+        return f"data:image/png;base64,{image_to_base64(img)}"
     except:
         return None
 
-# Chargement de l'image de profil
-profile_base64 = load_profile_image()
+def create_skill_chart(skills_data):
+    """Crée un graphique radar des compétences"""
+    categories = list(skills_data.keys())
+    values = list(skills_data.values())
+    
+    # Couleurs adaptées au mode sombre
+    colors = ['#667eea', '#764ba2'] if st.session_state.dark_mode else ['#667eea', '#764ba2']
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatterpolar(
+        r=values,
+        theta=categories,
+        fill='toself',
+        name='Compétences',
+        line_color=colors[0]
+    ))
+    
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 100],
+                gridcolor='rgba(255,255,255,0.1)' if st.session_state.dark_mode else 'rgba(0,0,0,0.1)',
+                linecolor='rgba(255,255,255,0.3)' if st.session_state.dark_mode else 'rgba(0,0,0,0.3)',
+                tickfont=dict(color='#e2e8f0' if st.session_state.dark_mode else '#2d3748')
+            ),
+            angularaxis=dict(
+                gridcolor='rgba(255,255,255,0.1)' if st.session_state.dark_mode else 'rgba(0,0,0,0.1)',
+                linecolor='rgba(255,255,255,0.3)' if st.session_state.dark_mode else 'rgba(0,0,0,0.3)',
+                tickfont=dict(color='#e2e8f0' if st.session_state.dark_mode else '#2d3748')
+            ),
+            bgcolor='rgba(0,0,0,0)' if st.session_state.dark_mode else 'rgba(255,255,255,0)'
+        ),
+        showlegend=False,
+        height=400,
+        margin=dict(l=20, r=20, t=40, b=20),
+        paper_bgcolor='rgba(0,0,0,0)' if st.session_state.dark_mode else 'rgba(255,255,255,0)',
+        plot_bgcolor='rgba(0,0,0,0)' if st.session_state.dark_mode else 'rgba(255,255,255,0)'
+    )
+    
+    return fig
 
-# CSS simple et efficace
-st.markdown("""
-<style>
-    .main-header {
-        text-align: center;
-        padding: 2rem 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-    }
+def create_project_metrics():
+    """Crée des métriques pour les projets"""
+    total_projects = len(PORTFOLIO_DATA["projects"])
+    ai_ml_projects = len([p for p in PORTFOLIO_DATA["projects"] if "AI" in p["category"] or "ML" in p["category"]])
+    data_science_projects = len([p for p in PORTFOLIO_DATA["projects"] if "Data Science" in p["category"]])
     
-    .skill-bar {
-        background-color: #f0f0f0;
-        border-radius: 10px;
-        height: 20px;
-        margin: 10px 0;
-        overflow: hidden;
+    return {
+        "total": total_projects,
+        "ai_ml": ai_ml_projects,
+        "data_science": data_science_projects
     }
-    
-    .skill-progress {
-        background: linear-gradient(90deg, #667eea, #764ba2);
-        height: 100%;
-        border-radius: 10px;
-        transition: width 1s ease;
-    }
-    
-    .project-card {
-        background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid #667eea;
-    }
-    
-    .education-card {
-        background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid #764ba2;
-    }
-    
-    .contact-info {
-        background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .social-links {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin: 1rem 0;
-    }
-    
-    .social-links a {
-        padding: 0.5rem 1rem;
-        background: #667eea;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        transition: background 0.3s;
-    }
-    
-    .social-links a:hover {
-        background: #764ba2;
-    }
-</style>
-""", unsafe_allow_html=True)
 
-# Header principal
+# ===== CHARGEMENT DES IMAGES =====
+try:
+    profile_img = Image.open("michel.jpeg")
+    circular_profile = make_circle(profile_img)
+    profile_base64 = f"data:image/png;base64,{image_to_base64(circular_profile)}"
+except:
+    profile_base64 = None
+
+project_images = {}
+for project in PORTFOLIO_DATA["projects"]:
+    project_images[project["title"]] = load_image(project["image"])
+
+# Chargement des images des certifications
+certification_images = {}
+for cert in PORTFOLIO_DATA["certifications"]:
+    certification_images[cert["title"]] = load_certification_image(cert["image"])
+
+# ===== SIDEBAR =====
+with st.sidebar:
+    st.write("### Navigation")
+    
+    # Mode sombre/clair avec toggle
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if st.button("🌙" if st.session_state.dark_mode else "☀️", on_click=toggle_dark_mode):
+            pass
+    with col2:
+        mode_text = "Dark Mode" if st.session_state.dark_mode else "Light Mode"
+        st.write(mode_text)
+    
+    # Statistiques rapides
+    metrics = create_project_metrics()
+    st.write("### 📊 Statistics")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Projects", metrics["total"])
+    with col2:
+        st.metric("AI/ML", metrics["ai_ml"])
+    
+    # Liens rapides
+    st.write("### 🔗 Quick Links")
+    if st.button("📄 Download CV"):
+        try:
+            with open("resume.pdf", "rb") as pdf_file:
+                PDFbyte = pdf_file.read()
+            st.download_button(
+                label="📄 CV Michel Sagesse Kolié",
+                data=PDFbyte,
+                file_name="MICHEL_SAGESSE_KOLIE_CV.pdf",
+                mime='application/pdf'
+            )
+        except FileNotFoundError:
+            st.error("CV not found")
+    
+    if st.button("📧 Contact Me"):
+        st.write("Email: " + PORTFOLIO_DATA['personal']['email'])
+
+# ===== APPLICATION DU MODE SOMBRE =====
+st.markdown(get_dark_mode_css(), unsafe_allow_html=True)
+
+# ===== HERO SECTION =====
 st.markdown(f"""
-<div class="main-header">
-    <h1>{PORTFOLIO_DATA['name']}</h1>
-    <h2>{PORTFOLIO_DATA['title']}</h2>
-    <p>{PORTFOLIO_DATA['about']}</p>
+<div class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>{PORTFOLIO_DATA['personal']['name']}</h1>
+            <h2>{PORTFOLIO_DATA['personal']['title']}</h2>
+            <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 2rem;">
+                {PORTFOLIO_DATA['personal']['about']}
+            </p>
+            <div class="social-icons">
+                <a href="{PORTFOLIO_DATA['personal']['linkedin']}" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn">
+                </a>
+                <a href="{PORTFOLIO_DATA['personal']['github']}" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub">
+                </a>
+                <a href="mailto:{PORTFOLIO_DATA['personal']['email']}">
+                    <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Email">
+                </a>
+                <a href="tel:{PORTFOLIO_DATA['personal']['phone']}">
+                    <img src="https://cdn-icons-png.flaticon.com/512/126/126341.png" alt="Phone">
+                </a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="{profile_base64}" alt="Michel Sagesse Kolié" width="200">
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Navigation par onglets
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "Home", "Skills", "Projects", "Experience", "Education", "Contact"
+# ===== NAVIGATION TABS =====
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    "🏠 Home", "🎓 Education", "💼 Experience", "🚀 Skills", 
+    "📂 Projects", "📜 Certifications", "📩 Contact"
 ])
 
-# Onglet Home
+# ===== TAB 1: ACCUEIL =====
 with tab1:
-    st.header("Welcome to my Portfolio")
+    st.header("👋 Welcome to my Portfolio")
     
-    col1, col2 = st.columns([1, 2])
+    # Introduction avec animation
+    with st.container():
+        st.markdown("""
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">🎯</div>
+                <h3>About Me</h3>
+            </div>
+            <p style="font-size: 1.1rem; line-height: 1.8;">
+                I am an engineering student passionate about <strong>Artificial Intelligence</strong> and 
+                <strong>Data Science</strong>. My goal is to create innovative solutions that 
+                transform data into valuable insights to solve complex problems.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Cartes de compétences clés
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        if profile_base64:
-            st.image(profile_base64, width=200)
+        st.markdown("""
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">📈</div>
+                <h3>Data Science</h3>
+            </div>
+            <p>Data analysis and modeling to extract valuable insights</p>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.write("I am an engineering student passionate about Artificial Intelligence and Data Science.")
-        st.write("My goal is to create innovative solutions that transform data into valuable insights.")
-        
         st.markdown("""
-        <div class="social-links">
-            <a href="https://www.linkedin.com/in/michel-sagesse-kolie-9313a9281/" target="_blank">LinkedIn</a>
-            <a href="https://github.com/MichelSagesse" target="_blank">GitHub</a>
-            <a href="mailto:michelsagesse16@gmail.com">Email</a>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">🤖</div>
+                <h3>AI & ML</h3>
+            </div>
+            <p>Development of machine learning and deep learning models</p>
         </div>
         """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">💾</div>
+                <h3>Big Data</h3>
+            </div>
+            <p>Processing and analysis of massive data volumes</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Graphique des compétences
+    st.write("### 📊 Skills Overview")
+    skill_chart = create_skill_chart(PORTFOLIO_DATA["skills"]["programming"])
+    st.plotly_chart(skill_chart, use_container_width=True)
 
-# Onglet Skills
+# ===== TAB 2: ÉDUCATION =====
 with tab2:
-    st.header("Technical Skills")
+    st.header("🎓 Academic Background")
     
-    for skill, level in PORTFOLIO_DATA["skills"].items():
-        st.write(f"{skill}: {level}%")
+    for i, education in enumerate(PORTFOLIO_DATA["education"]):
         st.markdown(f"""
-        <div class="skill-bar">
-            <div class="skill-progress" style="width: {level}%;"></div>
+        <div class="timeline-item">
+            <div class="timeline-content">
+                <div class="timeline-date">{education['period']}</div>
+                <div class="timeline-title">{education['degree']}</div>
+                <div class="timeline-subtitle">{education['institution']}</div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">
+                    {education['description']}
+                </p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-# Onglet Projects
+# ===== TAB 3: EXPÉRIENCE =====
 with tab3:
-    st.header("Projects")
+    st.header("💼 Professional Experience")
     
-    for project in PORTFOLIO_DATA["projects"]:
-        st.markdown(f"""
-        <div class="project-card">
-            <h3>{project['title']}</h3>
-            <p><strong>Description:</strong> {project['description']}</p>
-            <p><strong>Technologies:</strong> {project['technologies']}</p>
-            <p><strong>Category:</strong> {project['category']}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    for experience in PORTFOLIO_DATA["experience"]:
+        with st.expander(f"💼 {experience['title']} - {experience['company']}"):
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                st.write("Period: " + experience['period'])
+                st.write("Company: " + experience['company'])
+            with col2:
+                st.write("Description: " + experience['description'])
+                st.write("Technologies: " + ", ".join(experience['technologies']))
 
-# Onglet Experience
+# ===== TAB 4: COMPÉTENCES =====
 with tab4:
-    st.header("Professional Experience")
+    st.header("🚀 Technical Skills")
     
-    for exp in PORTFOLIO_DATA["experience"]:
-        st.markdown(f"""
-        <div class="project-card">
-            <h3>{exp['title']}</h3>
-            <p><strong>Company:</strong> {exp['company']}</p>
-            <p><strong>Period:</strong> {exp['period']}</p>
-            <p><strong>Description:</strong> {exp['description']}</p>
-            <p><strong>Technologies:</strong> {exp['technologies']}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write("### 💻 Programming Languages")
+        for skill, level in PORTFOLIO_DATA["skills"]["programming"].items():
+            st.markdown(f"""
+            <div class="skill-container">
+                <div class="skill-info">
+                    <span class="skill-name">{skill}</span>
+                    <span class="skill-percentage">{level}%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: {level}%;"></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.write("### 🗄️ Databases")
+        for skill, level in PORTFOLIO_DATA["skills"]["databases"].items():
+            st.markdown(f"""
+            <div class="skill-container">
+                <div class="skill-info">
+                    <span class="skill-name">{skill}</span>
+                    <span class="skill-percentage">{level}%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: {level}%;"></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with col2:
+        st.write("### 🛠️ Tools & Technologies")
+        for skill, level in PORTFOLIO_DATA["skills"]["tools"].items():
+            st.markdown(f"""
+            <div class="skill-container">
+                <div class="skill-info">
+                    <span class="skill-name">{skill}</span>
+                    <span class="skill-percentage">{level}%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: {level}%;"></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.write("### 🎯 Soft Skills")
+        soft_skills = [
+            "Problem solving",
+            "Teamwork",
+            "Effective communication",
+            "Time management",
+            "Analytical thinking",
+            "Creativity",
+            "Continuous learning"
+        ]
+        
+        for skill in soft_skills:
+            st.markdown(f"• {skill}")
 
-# Onglet Education
+# ===== TAB 5: PROJETS =====
 with tab5:
-    st.header("Education")
+    st.header("📂 Completed Projects")
     
-    for edu in PORTFOLIO_DATA["education"]:
-        st.markdown(f"""
-        <div class="education-card">
-            <h3>{edu['degree']}</h3>
-            <p><strong>Institution:</strong> {edu['institution']}</p>
-            <p><strong>Period:</strong> {edu['period']}</p>
-            <p><strong>Description:</strong> {edu['description']}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Filtres de projets
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        category_filter = st.selectbox(
+            "Filter by category",
+            ["All", "AI/ML", "Data Science", "Computer Vision", "Recommendation Systems","Big Data"]
+        )
+    
+    # Affichage des projets
+    filtered_projects = PORTFOLIO_DATA["projects"]
+    if category_filter != "All":
+        filtered_projects = [p for p in PORTFOLIO_DATA["projects"] if category_filter in p["category"]]
+    
+    for project in filtered_projects:
+        with st.expander(f"🚀 {project['title']}"):
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                if project_images.get(project["title"]):
+                    st.image(project_images[project["title"]], use_column_width=True)
+            
+            with col2:
+                st.write("Description: " + project['description'])
+                st.write("Category: " + project['category'])
+                st.write("Technologies: " + ", ".join(project['technologies']))
+            
+            # Section vidéo de démonstration
+            st.write("### 🎬 Video Demonstration")
+            video_path = get_video_path(project["title"])
+            display_project_video(video_path)
 
-# Onglet Contact
+# ===== TAB 6: CERTIFICATIONS =====
 with tab6:
-    st.header("Contact Information")
-    
-    st.markdown(f"""
-    <div class="contact-info">
-        <p><strong>Email:</strong> {PORTFOLIO_DATA['email']}</p>
-        <p><strong>Phone:</strong> {PORTFOLIO_DATA['phone']}</p>
-        <p><strong>Address:</strong> {PORTFOLIO_DATA['address']}</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.header("Certifications")
+    st.header("📜 Certifications")
     
     for cert in PORTFOLIO_DATA["certifications"]:
+        with st.expander(f"📜 {cert['title']}"):
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                # Affichage de l'image de certification
+                cert_image = certification_images.get(cert["title"])
+                display_certification_image(cert_image, cert["title"])
+            
+            with col2:
+                st.write("Issuer: " + cert['issuer'])
+                st.write("Date: " + cert['date'])
+                st.markdown(f"[View certification]({cert['link']})")
+
+# ===== TAB 7: CONTACT =====
+with tab7:
+    st.header("📩 Contact Me")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write("### 📞 Contact Information")
         st.markdown(f"""
-        <div class="project-card">
-            <h3>{cert['title']}</h3>
-            <p><strong>Issuer:</strong> {cert['issuer']}</p>
-            <p><strong>Date:</strong> {cert['date']}</p>
-            <a href="{cert['link']}" target="_blank">View Certificate</a>
+        <div class="contact-info">
+            <p>📧 <strong>Email:</strong> {PORTFOLIO_DATA['personal']['email']}</p>
+            <p>📞 <strong>Phone:</strong> {PORTFOLIO_DATA['personal']['phone']}</p>
+            <p>📍 <strong>Address:</strong> {PORTFOLIO_DATA['personal']['address']}</p>
         </div>
         """, unsafe_allow_html=True)
+        
+        st.write("### 🔗 Social Networks")
+        st.markdown(f"""
+        <div class="social-icons">
+            <a href="{PORTFOLIO_DATA['personal']['linkedin']}" target="_blank">
+                <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="40">
+            </a>
+            <a href="{PORTFOLIO_DATA['personal']['github']}" target="_blank">
+                <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" width="40">
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.write("### 💬 Send a Message")
+        contact_form = f"""
+        <form action="https://formsubmit.co/{PORTFOLIO_DATA['personal']['email']}" method="POST" class="contact-form">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="email" name="email" placeholder="Your email" required>
+            <textarea name="message" placeholder="Your message" required></textarea>
+            <button type="submit">📤 Send</button>
+        </form>
+        """
+        st.markdown(contact_form, unsafe_allow_html=True)
 
-# Footer
+# ===== FOOTER =====
 st.markdown("""
----
-**Portfolio Michel Sagesse Kolié** - Data Scientist & AI Engineer
-""")
+<footer>
+    <p>© 2025 Michel Sagesse Kolié - All rights reserved</p>
+    <p>Last updated: """ + datetime.now().strftime("%B %Y") + """</p>
+</footer>
+""", unsafe_allow_html=True)
+
+# ===== SCRIPT JAVASCRIPT POUR ANIMATIONS =====
+st.markdown("""
+<script>
+// Animation des barres de compétences
+document.addEventListener('DOMContentLoaded', function() {
+    const skillBars = document.querySelectorAll('.skill-progress');
+    skillBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+});
+
+// Animation au scroll
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.card, .timeline-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'all 0.6s ease';
+    observer.observe(el);
+});
+</script>
+""", unsafe_allow_html=True)
