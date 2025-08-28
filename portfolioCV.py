@@ -232,13 +232,13 @@ def display_certification_image(image_path, alt_text, size=(80, 80)):
 PORTFOLIO_DATA = {
     "personal": {
         "name": "MICHEL SAGESSE KOLIE",
-        "title": "Data Scientist | AI & Big Data Engineer",
+        "title": "Data Scientist AI Big Data Engineer",
         "email": "michelsagesse16@gmail.com",
-        "phone": "+212710871157",
-        "address": "Tetouan, Morocco",
+        "phone": "212710871157",
+        "address": "Tetouan Morocco",
         "linkedin": "https://www.linkedin.com/in/michel-sagesse-kolie-9313a9281/",
         "github": "https://github.com/MichelSagesse",
-        "about": "Passionate about AI and Data Science, I transform data into innovative solutions."
+        "about": "Passionate about AI and Data Science I transform data into innovative solutions"
     },
     "skills": {
         "programming": {
@@ -268,47 +268,47 @@ PORTFOLIO_DATA = {
     "projects": [
         {
             "title": "Heart Rate Prediction and Patient Monitoring System",
-            "description": "XGBoost algorithm estimates heart rate by filtering arm movement interferences through PPG and accelerometer signal comparison.",
+            "description": "XGBoost algorithm estimates heart rate by filtering arm movement interferences through PPG and accelerometer signal comparison",
             "image": "frequence_cardiaque.jpg",
             "technologies": ["Python", "XGBoost", "PCA", "Sensors", "Pandas"],
             "video": "appmedical.mp4",
-            "category": "AI/ML"
+            "category": "AI ML"
         },
         {
             "title": "Movie Recommendation System",
-            "description": "Hybrid recommendation engine combining collaborative filtering and content-based approaches",
+            "description": "Hybrid recommendation engine combining collaborative filtering and content based approaches",
             "image": "movie_recommendation.jpg",
-            "technologies": ["Collaborative Filtering", "Content-Based", "Pandas", "Scikit-learn"],
+            "technologies": ["Collaborative Filtering", "Content Based", "Pandas", "Scikit learn"],
             "video": "",
             "category": "Recommendation Systems"
         }
     ],
     "experience": [
         {
-            "title": "AI (NLP) Intern",
+            "title": "AI NLP Intern",
             "company": "Smart Automation Technologies",
-            "period": "July 2025 - August 2025",
+            "period": "July 2025 August 2025",
             "description": "Development of intelligent multilingual translation assistant with automatic language detection",
-            "technologies": ["Python", "Scikit-learn", "Transformers", "Hugging Face", "NLP", "Langchain"]
+            "technologies": ["Python", "Scikit learn", "Transformers", "Hugging Face", "NLP", "Langchain"]
         }
     ],
     "education": [
         {
-            "degree": "Engineering Cycle - Data Science, AI & Big Data",
+            "degree": "Engineering Cycle Data Science AI Big Data",
             "institution": "ENSA Tetouan",
-            "period": "2023 - Present",
+            "period": "2023 Present",
             "description": "Specialization in artificial intelligence and massive data processing"
         },
         {
             "degree": "Preparatory Classes",
             "institution": "ENSA Tetouan",
-            "period": "2021 - 2023",
+            "period": "2021 2023",
             "description": "Intensive training in mathematics and engineering sciences"
         },
         {
-            "degree": "Scientific BAC - High Honors",
-            "institution": "GSP Saint Jean, N'Zerekore",
-            "period": "2019 - 2020",
+            "degree": "Scientific BAC High Honors",
+            "institution": "GSP Saint Jean NZerekore",
+            "period": "2019 2020",
             "description": "Diploma with high honors in sciences"
         }
     ],
@@ -376,25 +376,9 @@ def clean_text_for_markdown(text):
     if not text:
         return ""
     
-    # Supprimer tous les caractères spéciaux et ne garder que les caractères ASCII basiques
+    # Supprimer TOUS les caractères spéciaux et ne garder que les lettres, chiffres et espaces
     import re
-    text = re.sub(r'[^\x20-\x7E]', '', text)  # Garder seulement les caractères ASCII imprimables
-    
-    # Remplacer les caractères qui peuvent causer des problèmes de regex
-    text = text.replace('(', ' ')
-    text = text.replace(')', ' ')
-    text = text.replace('[', ' ')
-    text = text.replace(']', ' ')
-    text = text.replace('{', ' ')
-    text = text.replace('}', ' ')
-    text = text.replace('*', ' ')
-    text = text.replace('+', ' ')
-    text = text.replace('?', ' ')
-    text = text.replace('.', ' ')
-    text = text.replace('|', ' ')
-    text = text.replace('^', ' ')
-    text = text.replace('$', ' ')
-    text = text.replace('\\', ' ')
+    text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)  # Garder seulement les lettres, chiffres et espaces
     
     # Nettoyer les espaces multiples
     text = re.sub(r'\s+', ' ', text)
@@ -510,7 +494,8 @@ with st.sidebar:
         if st.button("🌙" if st.session_state.dark_mode else "☀️", on_click=toggle_dark_mode):
             pass
     with col2:
-        st.write(f"**Mode {'Dark' if st.session_state.dark_mode else 'Light'}**")
+        mode_text = "Dark Mode" if st.session_state.dark_mode else "Light Mode"
+        st.write(mode_text)
     
     # Statistiques rapides
     metrics = create_project_metrics()
@@ -537,7 +522,7 @@ with st.sidebar:
             st.error("CV not found")
     
     if st.button("📧 Contact Me"):
-        st.write(f"📧 {PORTFOLIO_DATA['personal']['email']}")
+        st.write("Email: " + PORTFOLIO_DATA['personal']['email'])
 
 # ===== APPLICATION DU MODE SOMBRE =====
 st.markdown(get_dark_mode_css(), unsafe_allow_html=True)
@@ -667,14 +652,14 @@ with tab3:
         with st.expander(f"💼 {experience['title']} - {experience['company']}"):
             col1, col2 = st.columns([1, 2])
             with col1:
-                st.write(f"**Period:** {experience['period']}")
-                st.write(f"**Company:** {experience['company']}")
+                st.write("Period: " + experience['period'])
+                st.write("Company: " + experience['company'])
             with col2:
                 description = clean_text_for_markdown(experience['description'])
                 technologies = ', '.join([clean_text_for_markdown(tech) for tech in experience['technologies']])
                 
-                st.write(f"**Description:** {description}")
-                st.write(f"**Technologies:** {technologies}")
+                st.write("Description: " + description)
+                st.write("Technologies: " + technologies)
 
 # ===== TAB 4: COMPÉTENCES =====
 with tab4:
@@ -770,9 +755,9 @@ with tab5:
                 category = clean_text_for_markdown(project['category'])
                 technologies = ', '.join([clean_text_for_markdown(tech) for tech in project['technologies']])
                 
-                st.write(f"**Description:** {description}")
-                st.write(f"**Category:** {category}")
-                st.write(f"**Technologies:** {technologies}")
+                st.write("Description: " + description)
+                st.write("Category: " + category)
+                st.write("Technologies: " + technologies)
             
             # Section vidéo de démonstration
             st.write("### 🎬 Video Demonstration")
@@ -793,8 +778,8 @@ with tab6:
                 display_certification_image(cert_image, cert["title"])
             
             with col2:
-                st.write(f"**Issuer:** {cert['issuer']}")
-                st.write(f"**Date:** {cert['date']}")
+                st.write("Issuer: " + cert['issuer'])
+                st.write("Date: " + cert['date'])
                 st.markdown(f"[View certification]({cert['link']})")
 
 # ===== TAB 7: CONTACT =====
