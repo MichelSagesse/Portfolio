@@ -137,8 +137,8 @@ def get_video_path(project_title):
     """Retourne le chemin de la vidéo pour un projet donné"""
     # Mapping des noms de projets vers les noms de fichiers vidéo
     video_mapping = {
-        "Système de prédiction de la fréquence cardiaque et de suivi des patients": "appmedical.mp4",
-        "Système de Recommandation de Films": ""
+        "Systeme de prediction de la frequence cardiaque et de suivi des patients": "appmedical.mp4",
+        "Systeme de Recommendation de Films": ""
     }
 
     video_filename = video_mapping.get(project_title)
@@ -236,9 +236,9 @@ PORTFOLIO_DATA = {
         "email": "michelsagesse16@gmail.com",
         "phone": "+212710871157",
         "address": "Tetouan, Morocco",
-        "linkedin": "https://www.linkedin.com/in/michel-sagesse-koli%C3%A9-9313a9281/",
+        "linkedin": "https://www.linkedin.com/in/michel-sagesse-kolie-9313a9281/",
         "github": "https://github.com/MichelSagesse",
-        "about": "Passionné par l'IA et la Data Science, je transforme les données en solutions innovantes."
+        "about": "Passionne par l'IA et la Data Science, je transforme les donnees en solutions innovantes."
     },
     "skills": {
         "programming": {
@@ -267,16 +267,16 @@ PORTFOLIO_DATA = {
     },
     "projects": [
         {
-            "title": "Système de prédiction de la fréquence cardiaque et de suivi des patients",
-            "description": "L'algorithme XGBoost permet d'estimer la fréquence cardiaque en filtrant les interférences dues aux mouvements du bras, grâce à une comparaison des signaux PPG et accéléromètre.",
+            "title": "Systeme de prediction de la frequence cardiaque et de suivi des patients",
+            "description": "L'algorithme XGBoost permet d'estimer la frequence cardiaque en filtrant les interferences dues aux mouvements du bras, grace a une comparaison des signaux PPG et accelerometre.",
             "image": "frequence_cardiaque.jpg",
             "technologies": ["Python", "XGBoost", "PCA", "Capteurs", "Pandas"],
             "video": "appmedical.mp4",
             "category": "AI/ML"
         },
         {
-            "title": "Système de Recommandation de Films",
-            "description": "Moteur de recommandation hybride combinant filtrage collaboratif et basé sur le contenu",
+            "title": "Systeme de Recommendation de Films",
+            "description": "Moteur de recommendation hybride combinant filtrage collaboratif et base sur le contenu",
             "image": "movie_recommendation.jpg",
             "technologies": ["Collaborative Filtering", "Content-Based", "Pandas", "Scikit-learn"],
             "video": "",
@@ -287,29 +287,29 @@ PORTFOLIO_DATA = {
         {
             "title": "AI (NLP) Intern",
             "company": "Smart Automation Technologies",
-            "period": "Juillet 2025 - Août 2025",
-            "description": "Développement Assistant intelligent de traduction multilingue avec détection automatique de langue",
+            "period": "Juillet 2025 - Aout 2025",
+            "description": "Developpement Assistant intelligent de traduction multilingue avec detection automatique de langue",
             "technologies": ["Python", "Scikit-learn", "Transformers", "Hugging Face", "NLP", "Langchain"]
         }
     ],
     "education": [
         {
-            "degree": "Cycle Ingénieur - Data Science, IA & Big Data",
-            "institution": "ENSA Tétouan",
-            "period": "2023 - Présent",
-            "description": "Spécialisation en intelligence artificielle et traitement de données massives"
+            "degree": "Cycle Ingenieur - Data Science, IA & Big Data",
+            "institution": "ENSA Tetouan",
+            "period": "2023 - Present",
+            "description": "Specialisation en intelligence artificielle et traitement de donnees massives"
         },
         {
-            "degree": "Classes Préparatoires",
-            "institution": "ENSA Tétouan",
+            "degree": "Classes Preparatoires",
+            "institution": "ENSA Tetouan",
             "period": "2021 - 2023",
-            "description": "Formation intensive en mathématiques et sciences de l'ingénieur"
+            "description": "Formation intensive en mathematiques et sciences de l'ingenieur"
         },
         {
-            "degree": "BAC Scientifique - Mention Très Bien",
-            "institution": "GSP Saint Jean, N'Zérékoré",
+            "degree": "BAC Scientifique - Mention Tres Bien",
+            "institution": "GSP Saint Jean, N'Zerekore",
             "period": "2019 - 2020",
-            "description": "Diplôme avec mention très bien en sciences"
+            "description": "Diplome avec mention tres bien en sciences"
         }
     ],
     "certifications": [
@@ -366,22 +366,370 @@ PORTFOLIO_DATA = {
 }
 
 # ===== FONCTIONS UTILITAIRES =====
+def safe_markdown(text, **kwargs):
+    """Affiche du texte de manière sécurisée en évitant les problèmes de regex"""
+    try:
+        # Essayer d'abord avec st.markdown
+        st.markdown(text, **kwargs)
+    except Exception as e:
+        # Si ça échoue, utiliser st.write comme fallback
+        st.write(text)
+
 def clean_text_for_markdown(text):
     """Nettoie le texte pour éviter les problèmes de regex dans le markdown"""
     if not text:
         return ""
-    # Supprimer les caractères de contrôle et les caractères spéciaux problématiques
-    import re
+    
     # Supprimer les caractères de contrôle
+    import re
     text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
-    # Remplacer les caractères problématiques par des équivalents sûrs
-    text = text.replace('´', "'")
-    text = text.replace('`', "'")
-    text = text.replace('"', '"')
-    text = text.replace('"', '"')
-    text = text.replace(''', "'")
-    text = text.replace(''', "'")
-    return text
+    
+    # Remplacer tous les caractères spéciaux problématiques
+    replacements = {
+        '´': "'",
+        '`': "'",
+        '"': '"',
+        '"': '"',
+        ''': "'",
+        ''': "'",
+        '–': '-',
+        '—': '-',
+        '…': '...',
+        '®': '(R)',
+        '©': '(C)',
+        '™': '(TM)',
+        '°': ' degres',
+        '±': '+/-',
+        '×': 'x',
+        '÷': '/',
+        '≤': '<=',
+        '≥': '>=',
+        '≠': '!=',
+        '≈': '~',
+        '∞': 'infini',
+        '√': 'racine',
+        '²': '2',
+        '³': '3',
+        '¼': '1/4',
+        '½': '1/2',
+        '¾': '3/4',
+        '€': 'EUR',
+        '£': 'GBP',
+        '¥': 'JPY',
+        '¢': 'cent',
+        '§': 'section',
+        '¶': 'paragraphe',
+        '†': '+',
+        '‡': '++',
+        '•': '-',
+        '·': '-',
+        '‣': '-',
+        '◦': '-',
+        '▪': '-',
+        '▫': '-',
+        '◊': '<>',
+        '○': 'O',
+        '●': 'O',
+        '◐': 'O',
+        '◑': 'O',
+        '◒': 'O',
+        '◓': 'O',
+        '◔': 'O',
+        '◕': 'O',
+        '◖': '[',
+        '◗': ']',
+        '◘': 'O',
+        '◙': 'O',
+        '◚': 'O',
+        '◛': 'O',
+        '◜': 'O',
+        '◝': 'O',
+        '◞': 'O',
+        '◟': 'O',
+        '◠': 'O',
+        '◡': 'O',
+        '◢': 'O',
+        '◣': 'O',
+        '◤': 'O',
+        '◥': 'O',
+        '◦': 'O',
+        '◧': 'O',
+        '◨': 'O',
+        '◩': 'O',
+        '◪': 'O',
+        '◫': 'O',
+        '◬': 'O',
+        '◭': 'O',
+        '◮': 'O',
+        '◯': 'O',
+        '◰': 'O',
+        '◱': 'O',
+        '◲': 'O',
+        '◳': 'O',
+        '◴': 'O',
+        '◵': 'O',
+        '◶': 'O',
+        '◷': 'O',
+        '◸': 'O',
+        '◹': 'O',
+        '◺': 'O',
+        '◻': 'O',
+        '◼': 'O',
+        '◽': 'O',
+        '◾': 'O',
+        '◿': 'O',
+        '☀': 'soleil',
+        '☁': 'nuage',
+        '☂': 'parapluie',
+        '☃': 'bonhomme_neige',
+        '☄': 'comete',
+        '★': '*',
+        '☆': '*',
+        '☎': 'telephone',
+        '☏': 'telephone',
+        '☐': 'case',
+        '☑': 'case_cochee',
+        '☒': 'case_barree',
+        '☓': 'X',
+        '☚': '<',
+        '☛': '>',
+        '☜': '<',
+        '☝': '^',
+        '☞': '>',
+        '☟': 'v',
+        '☠': 'tete_de_mort',
+        '☡': 'attention',
+        '☢': 'radioactif',
+        '☣': 'biohazard',
+        '☤': 'caducee',
+        '☥': 'ankh',
+        '☦': 'croix_orthodoxe',
+        '☧': 'chi_rho',
+        '☨': 'croix_latine',
+        '☩': 'croix_maltese',
+        '☪': 'croissant_etoile',
+        '☫': 'farsi',
+        '☬': 'khanda',
+        '☭': 'marteau_faucille',
+        '☮': 'paix',
+        '☯': 'yin_yang',
+        '☰': 'trigramme',
+        '☱': 'trigramme',
+        '☲': 'trigramme',
+        '☳': 'trigramme',
+        '☴': 'trigramme',
+        '☵': 'trigramme',
+        '☶': 'trigramme',
+        '☷': 'trigramme',
+        '☸': 'dharma',
+        '☹': 'visage_triste',
+        '☺': 'visage_heureux',
+        '☻': 'visage_heureux',
+        '☼': 'soleil',
+        '☽': 'lune',
+        '☾': 'lune',
+        '☿': 'mercure',
+        '♀': 'venus',
+        '♁': 'terre',
+        '♂': 'mars',
+        '♃': 'jupiter',
+        '♄': 'saturne',
+        '♅': 'uranus',
+        '♆': 'neptune',
+        '♇': 'pluton',
+        '♈': 'belier',
+        '♉': 'taureau',
+        '♊': 'gemeaux',
+        '♋': 'cancer',
+        '♌': 'lion',
+        '♍': 'vierge',
+        '♎': 'balance',
+        '♏': 'scorpion',
+        '♐': 'sagittaire',
+        '♑': 'capricorne',
+        '♒': 'verseau',
+        '♓': 'poissons',
+        '♔': 'roi_blanc',
+        '♕': 'reine_blanche',
+        '♖': 'tour_blanche',
+        '♗': 'fou_blanc',
+        '♘': 'cavalier_blanc',
+        '♙': 'pion_blanc',
+        '♚': 'roi_noir',
+        '♛': 'reine_noire',
+        '♜': 'tour_noire',
+        '♝': 'fou_noir',
+        '♞': 'cavalier_noir',
+        '♟': 'pion_noir',
+        '♠': 'pique',
+        '♡': 'coeur',
+        '♢': 'carreau',
+        '♣': 'trefle',
+        '♤': 'pique_blanc',
+        '♥': 'coeur_rouge',
+        '♦': 'carreau_rouge',
+        '♧': 'trefle_blanc',
+        '♨': 'bain_chaud',
+        '♩': 'note',
+        '♪': 'note',
+        '♫': 'notes',
+        '♬': 'notes',
+        '♭': 'bemol',
+        '♮': 'becarre',
+        '♯': 'diese',
+        '♰': 'croix',
+        '♱': 'croix',
+        '♲': 'recyclage',
+        '♳': 'recyclage',
+        '♴': 'recyclage',
+        '♵': 'recyclage',
+        '♶': 'recyclage',
+        '♷': 'recyclage',
+        '♸': 'recyclage',
+        '♹': 'recyclage',
+        '♺': 'recyclage',
+        '♻': 'recyclage',
+        '♼': 'recyclage',
+        '♽': 'recyclage',
+        '♾': 'infini',
+        '♿': 'fauteuil_roulant',
+        '⚀': 'de_1',
+        '⚁': 'de_2',
+        '⚂': 'de_3',
+        '⚃': 'de_4',
+        '⚄': 'de_5',
+        '⚅': 'de_6',
+        '⚆': 'de_blanc',
+        '⚇': 'de_noir',
+        '⚈': 'de_blanc',
+        '⚉': 'de_noir',
+        '⚊': 'ligne',
+        '⚋': 'ligne',
+        '⚌': 'ligne',
+        '⚍': 'ligne',
+        '⚎': 'ligne',
+        '⚏': 'ligne',
+        '⚐': 'ligne',
+        '⚑': 'ligne',
+        '⚒': 'marteau_pioche',
+        '⚓': 'ancre',
+        '⚔': 'epees',
+        '⚕': 'caducee',
+        '⚖': 'balance',
+        '⚗': 'alambic',
+        '⚘': 'fleur',
+        '⚙': 'engrenage',
+        '⚚': 'caducee',
+        '⚛': 'atome',
+        '⚜': 'fleur_de_lys',
+        '⚝': 'etoile',
+        '⚞': 'etoile',
+        '⚟': 'etoile',
+        '⚠': 'attention',
+        '⚡': 'eclair',
+        '⚢': 'femmes',
+        '⚣': 'hommes',
+        '⚤': 'femme_homme',
+        '⚥': 'femme_homme',
+        '⚦': 'homme_femme',
+        '⚧': 'homme_femme',
+        '⚨': 'mars_fleche',
+        '⚩': 'venus_fleche',
+        '⚪': 'cercle_blanc',
+        '⚫': 'cercle_noir',
+        '⚬': 'cercle_blanc',
+        '⚭': 'cercle_blanc',
+        '⚮': 'cercle_blanc',
+        '⚯': 'cercle_blanc',
+        '⚰': 'cercueil',
+        '⚱': 'urne',
+        '⚲': 'neutre',
+        '⚳': 'ceres',
+        '⚴': 'pallas',
+        '⚵': 'juno',
+        '⚶': 'vesta',
+        '⚷': 'chiron',
+        '⚸': 'lune_noeud',
+        '⚹': 'sextile',
+        '⚺': 'semisextile',
+        '⚻': 'quincunx',
+        '⚼': 'sesquiquadre',
+        '⚽': 'football',
+        '⚾': 'baseball',
+        '⚿': 'cible',
+        '⛀': 'cible',
+        '⛁': 'cible',
+        '⛂': 'cible',
+        '⛃': 'cible',
+        '⛄': 'bonhomme_neige',
+        '⛅': 'soleil_nuage',
+        '⛆': 'pluie',
+        '⛇': 'neige',
+        '⛈': 'orage',
+        '⛉': 'soleil',
+        '⛊': 'lune',
+        '⛋': 'lune',
+        '⛌': 'lune',
+        '⛍': 'lune',
+        '⛎': 'ophiuchus',
+        '⛏': 'pioche',
+        '⛐': 'lune',
+        '⛑': 'casque',
+        '⛒': 'route',
+        '⛓': 'chaines',
+        '⛔': 'interdit',
+        '⛕': 'route',
+        '⛖': 'route',
+        '⛗': 'route',
+        '⛘': 'route',
+        '⛙': 'route',
+        '⛚': 'route',
+        '⛛': 'route',
+        '⛜': 'route',
+        '⛝': 'route',
+        '⛞': 'route',
+        '⛟': 'route',
+        '⛠': 'route',
+        '⛡': 'route',
+        '⛢': 'uranus',
+        '⛣': 'route',
+        '⛤': 'route',
+        '⛥': 'route',
+        '⛦': 'route',
+        '⛧': 'route',
+        '⛨': 'route',
+        '⛩': 'sanctuaire',
+        '⛪': 'eglise',
+        '⛫': 'eglise',
+        '⛬': 'eglise',
+        '⛭': 'eglise',
+        '⛮': 'eglise',
+        '⛯': 'eglise',
+        '⛰': 'montagne',
+        '⛱': 'parasol',
+        '⛲': 'fontaine',
+        '⛳': 'golf',
+        '⛴': 'ferry',
+        '⛵': 'voilier',
+        '⛶': 'voilier',
+        '⛷': 'ski',
+        '⛸': 'patinage',
+        '⛹': 'basketball',
+        '⛺': 'tente',
+        '⛻': 'route',
+        '⛼': 'route',
+        '⛽': 'essence',
+        '⛾': 'route',
+        '⛿': 'route'
+    }
+    
+    for old_char, new_char in replacements.items():
+        text = text.replace(old_char, new_char)
+    
+    # Supprimer les caractères restants problématiques
+    text = re.sub(r'[^\w\s\-.,!?;:()\[\]{}"\']', '', text)
+    
+    return text.strip()
 
 def image_to_base64(image):
     """Convertit une image PIL en base64"""
@@ -661,7 +1009,7 @@ with tab3:
                 description = clean_text_for_markdown(experience['description'])
                 technologies = ', '.join([clean_text_for_markdown(tech) for tech in experience['technologies']])
                 
-                st.markdown(f"""
+                safe_markdown(f"""
                 **Description:** {description}
                 
                 **Technologies:** {technologies}
@@ -761,7 +1109,7 @@ with tab5:
                 category = clean_text_for_markdown(project['category'])
                 technologies = ', '.join([clean_text_for_markdown(tech) for tech in project['technologies']])
                 
-                st.markdown(f"""
+                safe_markdown(f"""
                 **Description:** {description}
                 
                 **Catégorie:** {category}
