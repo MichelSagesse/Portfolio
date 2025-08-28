@@ -137,10 +137,8 @@ def get_video_path(project_title):
     """Retourne le chemin de la vidéo pour un projet donné"""
     # Mapping des noms de projets vers les noms de fichiers vidéo
     video_mapping = {
-        "Système de Prédiction Boursière": "",
-        "Système d'estimation de la frequence cardiaque et de suivi medical":"app_medical.mp4",
-        "Système  d'analyse automatique des avis clients et des recommandations produits.":"",
-        "Système de Recommandation de Films": "#"
+        "Système de prédiction de la fréquence cardiaque et de suivi des patients": "appmedical.mp4",
+        "Système de Recommandation de Films": ""
     }
 
     video_filename = video_mapping.get(project_title)
@@ -269,7 +267,7 @@ PORTFOLIO_DATA = {
     },
     "projects": [
         {
-            "title": "Système de prédiction dela fréquence cardiaque et de suivi des patients.",
+            "title": "Système de prédiction de la fréquence cardiaque et de suivi des patients",
             "description": "L'algorithme XGBoost permet d'estimer la fréquence cardiaque en filtrant les interférences dues aux mouvements du bras, grâce à une comparaison des signaux PPG et accéléromètre.",
             "image": "frequence_cardiaque.jpg",
             "technologies": ["Python", "XGBoost", "PCA", "Capteurs", "Pandas"],
@@ -281,7 +279,6 @@ PORTFOLIO_DATA = {
             "description": "Moteur de recommandation hybride combinant filtrage collaboratif et basé sur le contenu",
             "image": "movie_recommendation.jpg",
             "technologies": ["Collaborative Filtering", "Content-Based", "Pandas", "Scikit-learn"],
-            
             "video": "",
             "category": "Recommendation Systems"
         }
@@ -291,8 +288,8 @@ PORTFOLIO_DATA = {
             "title": "AI (NLP) Intern",
             "company": "Smart Automation Technologies",
             "period": "Juillet 2025 - Août 2025",
-            "description": "Développement Assistant intelligent de traductionmultilingue avec d´etection automatique de langue",
-            "technologies": ["Python", "Scikit-learn", "Transformers", "Hugging Face","NLP","Langchain"]
+            "description": "Développement Assistant intelligent de traduction multilingue avec détection automatique de langue",
+            "technologies": ["Python", "Scikit-learn", "Transformers", "Hugging Face", "NLP", "Langchain"]
         }
     ],
     "education": [
@@ -369,6 +366,23 @@ PORTFOLIO_DATA = {
 }
 
 # ===== FONCTIONS UTILITAIRES =====
+def clean_text_for_markdown(text):
+    """Nettoie le texte pour éviter les problèmes de regex dans le markdown"""
+    if not text:
+        return ""
+    # Supprimer les caractères de contrôle et les caractères spéciaux problématiques
+    import re
+    # Supprimer les caractères de contrôle
+    text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+    # Remplacer les caractères problématiques par des équivalents sûrs
+    text = text.replace('´', "'")
+    text = text.replace('`', "'")
+    text = text.replace('"', '"')
+    text = text.replace('"', '"')
+    text = text.replace(''', "'")
+    text = text.replace(''', "'")
+    return text
+
 def image_to_base64(image):
     """Convertit une image PIL en base64"""
     buffered = BytesIO()
@@ -644,10 +658,13 @@ with tab3:
                 **Entreprise:** {experience['company']}
                 """)
             with col2:
-                st.markdown(f"""
-                **Description:** {experience['description']}
+                description = clean_text_for_markdown(experience['description'])
+                technologies = ', '.join([clean_text_for_markdown(tech) for tech in experience['technologies']])
                 
-                **Technologies:** {', '.join(experience['technologies'])}
+                st.markdown(f"""
+                **Description:** {description}
+                
+                **Technologies:** {technologies}
                 """)
 
 # ===== TAB 4: COMPÉTENCES =====
@@ -740,13 +757,16 @@ with tab5:
                     st.image(project_images[project["title"]], use_column_width=True)
             
             with col2:
+                description = clean_text_for_markdown(project['description'])
+                category = clean_text_for_markdown(project['category'])
+                technologies = ', '.join([clean_text_for_markdown(tech) for tech in project['technologies']])
+                
                 st.markdown(f"""
-                **Description:** {project['description']}
+                **Description:** {description}
                 
-                **Catégorie:** {project['category']}
+                **Catégorie:** {category}
                 
-                **Technologies:** {', '.join(project['technologies'])}
-            
+                **Technologies:** {technologies}
                 """)
             
             # Section vidéo de démonstration
