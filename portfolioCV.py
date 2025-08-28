@@ -376,354 +376,28 @@ def clean_text_for_markdown(text):
     if not text:
         return ""
     
-    # Supprimer les caractères de contrôle
+    # Supprimer tous les caractères spéciaux et ne garder que les caractères ASCII basiques
     import re
-    text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+    text = re.sub(r'[^\x20-\x7E]', '', text)  # Garder seulement les caractères ASCII imprimables
     
-    # Remplacer les caractères spéciaux les plus problématiques
-    replacements = {
-        '´': "'",
-        '`': "'",
-        '"': '"',
-        '"': '"',
-        ''': "'",
-        ''': "'",
-        '–': '-',
-        '—': '-',
-        '…': '...',
-        '®': '(R)',
-        '©': '(C)',
-        '™': '(TM)',
-        '°': ' degrees',
-        '±': '+/-',
-        '×': 'x',
-        '÷': '/',
-        '≤': '<=',
-        '≥': '>=',
-        '≠': '!=',
-        '≈': '~',
-        '∞': 'infinity',
-        '√': 'sqrt',
-        '²': '2',
-        '³': '3',
-        '¼': '1/4',
-        '½': '1/2',
-        '¾': '3/4',
-        '€': 'EUR',
-        '£': 'GBP',
-        '¥': 'JPY',
-        '¢': 'cent',
-        '§': 'section',
-        '¶': 'paragraph',
-        '†': '+',
-        '‡': '++',
-        '•': '-',
-        '·': '-',
-        '‣': '-',
-        '◦': '-',
-        '▪': '-',
-        '▫': '-',
-        '◊': '<>',
-        '○': 'O',
-        '●': 'O',
-        '◐': 'O',
-        '◑': 'O',
-        '◒': 'O',
-        '◓': 'O',
-        '◔': 'O',
-        '◕': 'O',
-        '◖': '[',
-        '◗': ']',
-        '◘': 'O',
-        '◙': 'O',
-        '◚': 'O',
-        '◛': 'O',
-        '◜': 'O',
-        '◝': 'O',
-        '◞': 'O',
-        '◟': 'O',
-        '◠': 'O',
-        '◡': 'O',
-        '◢': 'O',
-        '◣': 'O',
-        '◤': 'O',
-        '◥': 'O',
-        '◦': 'O',
-        '◧': 'O',
-        '◨': 'O',
-        '◩': 'O',
-        '◪': 'O',
-        '◫': 'O',
-        '◬': 'O',
-        '◭': 'O',
-        '◮': 'O',
-        '◯': 'O',
-        '◰': 'O',
-        '◱': 'O',
-        '◲': 'O',
-        '◳': 'O',
-        '◴': 'O',
-        '◵': 'O',
-        '◶': 'O',
-        '◷': 'O',
-        '◸': 'O',
-        '◹': 'O',
-        '◺': 'O',
-        '◻': 'O',
-        '◼': 'O',
-        '◽': 'O',
-        '◾': 'O',
-        '◿': 'O',
-        '☀': 'sun',
-        '☁': 'cloud',
-        '☂': 'umbrella',
-        '☃': 'snowman',
-        '☄': 'comet',
-        '★': '*',
-        '☆': '*',
-        '☎': 'phone',
-        '☏': 'phone',
-        '☐': 'checkbox',
-        '☑': 'checked',
-        '☒': 'crossed',
-        '☓': 'X',
-        '☚': '<',
-        '☛': '>',
-        '☜': '<',
-        '☝': '^',
-        '☞': '>',
-        '☟': 'v',
-        '☠': 'skull',
-        '☡': 'warning',
-        '☢': 'radioactive',
-        '☣': 'biohazard',
-        '☤': 'caduceus',
-        '☥': 'ankh',
-        '☦': 'orthodox_cross',
-        '☧': 'chi_rho',
-        '☨': 'latin_cross',
-        '☩': 'maltese_cross',
-        '☪': 'star_crescent',
-        '☫': 'farsi',
-        '☬': 'khanda',
-        '☭': 'hammer_sickle',
-        '☮': 'peace',
-        '☯': 'yin_yang',
-        '☰': 'trigram',
-        '☱': 'trigram',
-        '☲': 'trigram',
-        '☳': 'trigram',
-        '☴': 'trigram',
-        '☵': 'trigram',
-        '☶': 'trigram',
-        '☷': 'trigram',
-        '☸': 'dharma',
-        '☹': 'sad_face',
-        '☺': 'happy_face',
-        '☻': 'happy_face',
-        '☼': 'sun',
-        '☽': 'moon',
-        '☾': 'moon',
-        '☿': 'mercury',
-        '♀': 'venus',
-        '♁': 'earth',
-        '♂': 'mars',
-        '♃': 'jupiter',
-        '♄': 'saturn',
-        '♅': 'uranus',
-        '♆': 'neptune',
-        '♇': 'pluto',
-        '♈': 'aries',
-        '♉': 'taurus',
-        '♊': 'gemini',
-        '♋': 'cancer',
-        '♌': 'leo',
-        '♍': 'virgo',
-        '♎': 'libra',
-        '♏': 'scorpio',
-        '♐': 'sagittarius',
-        '♑': 'capricorn',
-        '♒': 'aquarius',
-        '♓': 'pisces',
-        '♔': 'white_king',
-        '♕': 'white_queen',
-        '♖': 'white_rook',
-        '♗': 'white_bishop',
-        '♘': 'white_knight',
-        '♙': 'white_pawn',
-        '♚': 'black_king',
-        '♛': 'black_queen',
-        '♜': 'black_rook',
-        '♝': 'black_bishop',
-        '♞': 'black_knight',
-        '♟': 'black_pawn',
-        '♠': 'spade',
-        '♡': 'heart',
-        '♢': 'diamond',
-        '♣': 'club',
-        '♤': 'white_spade',
-        '♥': 'red_heart',
-        '♦': 'red_diamond',
-        '♧': 'white_club',
-        '♨': 'hot_springs',
-        '♩': 'note',
-        '♪': 'note',
-        '♫': 'notes',
-        '♬': 'notes',
-        '♭': 'flat',
-        '♮': 'natural',
-        '♯': 'sharp',
-        '♰': 'cross',
-        '♱': 'cross',
-        '♲': 'recycling',
-        '♳': 'recycling',
-        '♴': 'recycling',
-        '♵': 'recycling',
-        '♶': 'recycling',
-        '♷': 'recycling',
-        '♸': 'recycling',
-        '♹': 'recycling',
-        '♺': 'recycling',
-        '♻': 'recycling',
-        '♼': 'recycling',
-        '♽': 'recycling',
-        '♾': 'infinity',
-        '♿': 'wheelchair',
-        '⚀': 'die_1',
-        '⚁': 'die_2',
-        '⚂': 'die_3',
-        '⚃': 'die_4',
-        '⚄': 'die_5',
-        '⚅': 'die_6',
-        '⚆': 'white_die',
-        '⚇': 'black_die',
-        '⚈': 'white_die',
-        '⚉': 'black_die',
-        '⚊': 'line',
-        '⚋': 'line',
-        '⚌': 'line',
-        '⚍': 'line',
-        '⚎': 'line',
-        '⚏': 'line',
-        '⚐': 'line',
-        '⚑': 'line',
-        '⚒': 'hammer_pick',
-        '⚓': 'anchor',
-        '⚔': 'swords',
-        '⚕': 'caduceus',
-        '⚖': 'scales',
-        '⚗': 'alembic',
-        '⚘': 'flower',
-        '⚙': 'gear',
-        '⚚': 'caduceus',
-        '⚛': 'atom',
-        '⚜': 'fleur_de_lys',
-        '⚝': 'star',
-        '⚞': 'star',
-        '⚟': 'star',
-        '⚠': 'warning',
-        '⚡': 'lightning',
-        '⚢': 'women',
-        '⚣': 'men',
-        '⚤': 'woman_man',
-        '⚥': 'woman_man',
-        '⚦': 'man_woman',
-        '⚧': 'man_woman',
-        '⚨': 'mars_arrow',
-        '⚩': 'venus_arrow',
-        '⚪': 'white_circle',
-        '⚫': 'black_circle',
-        '⚬': 'white_circle',
-        '⚭': 'white_circle',
-        '⚮': 'white_circle',
-        '⚯': 'white_circle',
-        '⚰': 'coffin',
-        '⚱': 'urn',
-        '⚲': 'neutral',
-        '⚳': 'ceres',
-        '⚴': 'pallas',
-        '⚵': 'juno',
-        '⚶': 'vesta',
-        '⚷': 'chiron',
-        '⚸': 'lunar_node',
-        '⚹': 'sextile',
-        '⚺': 'semisextile',
-        '⚻': 'quincunx',
-        '⚼': 'sesquiquadrate',
-        '⚽': 'football',
-        '⚾': 'baseball',
-        '⚿': 'target',
-        '⛀': 'target',
-        '⛁': 'target',
-        '⛂': 'target',
-        '⛃': 'target',
-        '⛄': 'snowman',
-        '⛅': 'sun_cloud',
-        '⛆': 'rain',
-        '⛇': 'snow',
-        '⛈': 'storm',
-        '⛉': 'sun',
-        '⛊': 'moon',
-        '⛋': 'moon',
-        '⛌': 'moon',
-        '⛍': 'moon',
-        '⛎': 'ophiuchus',
-        '⛏': 'pickaxe',
-        '⛐': 'moon',
-        '⛑': 'helmet',
-        '⛒': 'road',
-        '⛓': 'chains',
-        '⛔': 'forbidden',
-        '⛕': 'road',
-        '⛖': 'road',
-        '⛗': 'road',
-        '⛘': 'road',
-        '⛙': 'road',
-        '⛚': 'road',
-        '⛛': 'road',
-        '⛜': 'road',
-        '⛝': 'road',
-        '⛞': 'road',
-        '⛟': 'road',
-        '⛠': 'road',
-        '⛡': 'road',
-        '⛢': 'uranus',
-        '⛣': 'road',
-        '⛤': 'road',
-        '⛥': 'road',
-        '⛦': 'road',
-        '⛧': 'road',
-        '⛨': 'road',
-        '⛩': 'shrine',
-        '⛪': 'church',
-        '⛫': 'church',
-        '⛬': 'church',
-        '⛭': 'church',
-        '⛮': 'church',
-        '⛯': 'church',
-        '⛰': 'mountain',
-        '⛱': 'parasol',
-        '⛲': 'fountain',
-        '⛳': 'golf',
-        '⛴': 'ferry',
-        '⛵': 'sailboat',
-        '⛶': 'sailboat',
-        '⛷': 'ski',
-        '⛸': 'skating',
-        '⛹': 'basketball',
-        '⛺': 'tent',
-        '⛻': 'road',
-        '⛼': 'road',
-        '⛽': 'gas',
-        '⛾': 'road',
-        '⛿': 'road'
-    }
+    # Remplacer les caractères qui peuvent causer des problèmes de regex
+    text = text.replace('(', ' ')
+    text = text.replace(')', ' ')
+    text = text.replace('[', ' ')
+    text = text.replace(']', ' ')
+    text = text.replace('{', ' ')
+    text = text.replace('}', ' ')
+    text = text.replace('*', ' ')
+    text = text.replace('+', ' ')
+    text = text.replace('?', ' ')
+    text = text.replace('.', ' ')
+    text = text.replace('|', ' ')
+    text = text.replace('^', ' ')
+    text = text.replace('$', ' ')
+    text = text.replace('\\', ' ')
     
-    for old_char, new_char in replacements.items():
-        text = text.replace(old_char, new_char)
-    
-    # Supprimer les caractères restants problématiques
-    text = re.sub(r'[^\w\s\-.,!?;:()\[\]{}"\']', '', text)
+    # Nettoyer les espaces multiples
+    text = re.sub(r'\s+', ' ', text)
     
     return text.strip()
 
@@ -828,11 +502,7 @@ for cert in PORTFOLIO_DATA["certifications"]:
 
 # ===== SIDEBAR =====
 with st.sidebar:
-    st.markdown("""
-    <div style="text-align: center; padding: 1rem;">
-        <h3>Navigation</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    st.write("### Navigation")
     
     # Mode sombre/clair avec toggle
     col1, col2 = st.columns([1, 3])
@@ -844,7 +514,7 @@ with st.sidebar:
     
     # Statistiques rapides
     metrics = create_project_metrics()
-    st.markdown("### 📊 Statistics")
+    st.write("### 📊 Statistics")
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Projects", metrics["total"])
@@ -852,7 +522,7 @@ with st.sidebar:
         st.metric("AI/ML", metrics["ai_ml"])
     
     # Liens rapides
-    st.markdown("### 🔗 Quick Links")
+    st.write("### 🔗 Quick Links")
     if st.button("📄 Download CV"):
         try:
             with open("resume.pdf", "rb") as pdf_file:
@@ -967,7 +637,7 @@ with tab1:
         """, unsafe_allow_html=True)
     
     # Graphique des compétences
-    st.subheader("📊 Skills Overview")
+    st.write("### 📊 Skills Overview")
     skill_chart = create_skill_chart(PORTFOLIO_DATA["skills"]["programming"])
     st.plotly_chart(skill_chart, use_container_width=True)
 
@@ -1013,7 +683,7 @@ with tab4:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("💻 Programming Languages")
+        st.write("### 💻 Programming Languages")
         for skill, level in PORTFOLIO_DATA["skills"]["programming"].items():
             st.markdown(f"""
             <div class="skill-container">
@@ -1027,7 +697,7 @@ with tab4:
             </div>
             """, unsafe_allow_html=True)
         
-        st.subheader("🗄️ Databases")
+        st.write("### 🗄️ Databases")
         for skill, level in PORTFOLIO_DATA["skills"]["databases"].items():
             st.markdown(f"""
             <div class="skill-container">
@@ -1042,7 +712,7 @@ with tab4:
             """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("🛠️ Tools & Technologies")
+        st.write("### 🛠️ Tools & Technologies")
         for skill, level in PORTFOLIO_DATA["skills"]["tools"].items():
             st.markdown(f"""
             <div class="skill-container">
@@ -1056,7 +726,7 @@ with tab4:
             </div>
             """, unsafe_allow_html=True)
         
-        st.subheader("🎯 Soft Skills")
+        st.write("### 🎯 Soft Skills")
         soft_skills = [
             "Problem solving",
             "Teamwork",
@@ -1105,7 +775,7 @@ with tab5:
                 st.write(f"**Technologies:** {technologies}")
             
             # Section vidéo de démonstration
-            st.markdown("### 🎬 Video Demonstration")
+            st.write("### 🎬 Video Demonstration")
             video_path = get_video_path(project["title"])
             display_project_video(video_path)
 
@@ -1134,7 +804,7 @@ with tab7:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("📞 Contact Information")
+        st.write("### 📞 Contact Information")
         st.markdown(f"""
         <div class="contact-info">
             <p>📧 <strong>Email:</strong> {PORTFOLIO_DATA['personal']['email']}</p>
@@ -1143,7 +813,7 @@ with tab7:
         </div>
         """, unsafe_allow_html=True)
         
-        st.subheader("🔗 Social Networks")
+        st.write("### 🔗 Social Networks")
         st.markdown(f"""
         <div class="social-icons">
             <a href="{PORTFOLIO_DATA['personal']['linkedin']}" target="_blank">
@@ -1156,7 +826,7 @@ with tab7:
         """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("💬 Send a Message")
+        st.write("### 💬 Send a Message")
         contact_form = f"""
         <form action="https://formsubmit.co/{PORTFOLIO_DATA['personal']['email']}" method="POST" class="contact-form">
             <input type="hidden" name="_captcha" value="false">
