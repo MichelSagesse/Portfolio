@@ -137,8 +137,8 @@ def get_video_path(project_title):
     """Retourne le chemin de la vidéo pour un projet donné"""
     # Mapping des noms de projets vers les noms de fichiers vidéo
     video_mapping = {
-        "Systeme de prediction de la frequence cardiaque et de suivi des patients": "appmedical.mp4",
-        "Systeme de Recommendation de Films": ""
+        "Heart Rate Prediction and Patient Monitoring System": "appmedical.mp4",
+        "Movie Recommendation System": ""
     }
 
     video_filename = video_mapping.get(project_title)
@@ -160,7 +160,7 @@ def display_project_video(video_path):
     else:
         st.markdown("""
         <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; text-align: center; color: var(--text-secondary);">
-            <p>🎬 Vidéo de démonstration en cours de préparation...</p>
+            <p>🎬 Video demonstration in preparation...</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -238,7 +238,7 @@ PORTFOLIO_DATA = {
         "address": "Tetouan, Morocco",
         "linkedin": "https://www.linkedin.com/in/michel-sagesse-kolie-9313a9281/",
         "github": "https://github.com/MichelSagesse",
-        "about": "Passionne par l'IA et la Data Science, je transforme les donnees en solutions innovantes."
+        "about": "Passionate about AI and Data Science, I transform data into innovative solutions."
     },
     "skills": {
         "programming": {
@@ -267,16 +267,16 @@ PORTFOLIO_DATA = {
     },
     "projects": [
         {
-            "title": "Systeme de prediction de la frequence cardiaque et de suivi des patients",
-            "description": "L'algorithme XGBoost permet d'estimer la frequence cardiaque en filtrant les interferences dues aux mouvements du bras, grace a une comparaison des signaux PPG et accelerometre.",
+            "title": "Heart Rate Prediction and Patient Monitoring System",
+            "description": "XGBoost algorithm estimates heart rate by filtering arm movement interferences through PPG and accelerometer signal comparison.",
             "image": "frequence_cardiaque.jpg",
-            "technologies": ["Python", "XGBoost", "PCA", "Capteurs", "Pandas"],
+            "technologies": ["Python", "XGBoost", "PCA", "Sensors", "Pandas"],
             "video": "appmedical.mp4",
             "category": "AI/ML"
         },
         {
-            "title": "Systeme de Recommendation de Films",
-            "description": "Moteur de recommendation hybride combinant filtrage collaboratif et base sur le contenu",
+            "title": "Movie Recommendation System",
+            "description": "Hybrid recommendation engine combining collaborative filtering and content-based approaches",
             "image": "movie_recommendation.jpg",
             "technologies": ["Collaborative Filtering", "Content-Based", "Pandas", "Scikit-learn"],
             "video": "",
@@ -287,29 +287,29 @@ PORTFOLIO_DATA = {
         {
             "title": "AI (NLP) Intern",
             "company": "Smart Automation Technologies",
-            "period": "Juillet 2025 - Aout 2025",
-            "description": "Developpement Assistant intelligent de traduction multilingue avec detection automatique de langue",
+            "period": "July 2025 - August 2025",
+            "description": "Development of intelligent multilingual translation assistant with automatic language detection",
             "technologies": ["Python", "Scikit-learn", "Transformers", "Hugging Face", "NLP", "Langchain"]
         }
     ],
     "education": [
         {
-            "degree": "Cycle Ingenieur - Data Science, IA & Big Data",
+            "degree": "Engineering Cycle - Data Science, AI & Big Data",
             "institution": "ENSA Tetouan",
             "period": "2023 - Present",
-            "description": "Specialisation en intelligence artificielle et traitement de donnees massives"
+            "description": "Specialization in artificial intelligence and massive data processing"
         },
         {
-            "degree": "Classes Preparatoires",
+            "degree": "Preparatory Classes",
             "institution": "ENSA Tetouan",
             "period": "2021 - 2023",
-            "description": "Formation intensive en mathematiques et sciences de l'ingenieur"
+            "description": "Intensive training in mathematics and engineering sciences"
         },
         {
-            "degree": "BAC Scientifique - Mention Tres Bien",
+            "degree": "Scientific BAC - High Honors",
             "institution": "GSP Saint Jean, N'Zerekore",
             "period": "2019 - 2020",
-            "description": "Diplome avec mention tres bien en sciences"
+            "description": "Diploma with high honors in sciences"
         }
     ],
     "certifications": [
@@ -844,20 +844,20 @@ with st.sidebar:
         if st.button("🌙" if st.session_state.dark_mode else "☀️", on_click=toggle_dark_mode):
             pass
     with col2:
-        st.markdown(f"**Mode {'Sombre' if st.session_state.dark_mode else 'Clair'}**")
+        st.markdown(f"**Mode {'Dark' if st.session_state.dark_mode else 'Light'}**")
     
     # Statistiques rapides
     metrics = create_project_metrics()
-    st.markdown("### 📊 Statistiques")
+    st.markdown("### 📊 Statistics")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Projets", metrics["total"])
+        st.metric("Projects", metrics["total"])
     with col2:
-        st.metric("IA/ML", metrics["ai_ml"])
+        st.metric("AI/ML", metrics["ai_ml"])
     
     # Liens rapides
-    st.markdown("### 🔗 Liens Rapides")
-    if st.button("📄 Télécharger CV"):
+    st.markdown("### 🔗 Quick Links")
+    if st.button("📄 Download CV"):
         try:
             with open("resume.pdf", "rb") as pdf_file:
                 PDFbyte = pdf_file.read()
@@ -868,9 +868,9 @@ with st.sidebar:
                 mime='application/pdf'
             )
         except FileNotFoundError:
-            st.error("CV non trouvé")
+            st.error("CV not found")
     
-    if st.button("📧 Me Contacter"):
+    if st.button("📧 Contact Me"):
         st.markdown(f"[📧 {PORTFOLIO_DATA['personal']['email']}](mailto:{PORTFOLIO_DATA['personal']['email']})")
 
 # ===== APPLICATION DU MODE SOMBRE =====
@@ -910,13 +910,13 @@ st.markdown(f"""
 
 # ===== NAVIGATION TABS =====
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "🏠 Accueil", "🎓 Éducation", "💼 Expérience", "🚀 Compétences", 
-    "📂 Projets", "📜 Certifications", "📩 Contact"
+    "🏠 Home", "🎓 Education", "💼 Experience", "🚀 Skills", 
+    "📂 Projects", "📜 Certifications", "📩 Contact"
 ])
 
 # ===== TAB 1: ACCUEIL =====
 with tab1:
-    st.header("👋 Bienvenue sur mon Portfolio")
+    st.header("👋 Welcome to my Portfolio")
     
     # Introduction avec animation
     with st.container():
@@ -924,12 +924,12 @@ with tab1:
         <div class="card">
             <div class="card-header">
                 <div class="card-icon">🎯</div>
-                <h3>À Propos de Moi</h3>
+                <h3>About Me</h3>
             </div>
             <p style="font-size: 1.1rem; line-height: 1.8;">
-                Je suis un élève ingénieur passionné par l'<strong>Intelligence Artificielle</strong> et la 
-                <strong>Data Science</strong>. Mon objectif est de créer des solutions innovantes qui 
-                transforment les données en insights précieux pour résoudre des problèmes complexes.
+                I am an engineering student passionate about <strong>Artificial Intelligence</strong> and 
+                <strong>Data Science</strong>. My goal is to create innovative solutions that 
+                transform data into valuable insights to solve complex problems.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -944,7 +944,7 @@ with tab1:
                 <div class="card-icon">📈</div>
                 <h3>Data Science</h3>
             </div>
-            <p>Analyse et modélisation de données pour extraire des insights précieux</p>
+            <p>Data analysis and modeling to extract valuable insights</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -953,9 +953,9 @@ with tab1:
         <div class="card">
             <div class="card-header">
                 <div class="card-icon">🤖</div>
-                <h3>IA & ML</h3>
+                <h3>AI & ML</h3>
             </div>
-            <p>Développement de modèles d'apprentissage automatique et deep learning</p>
+            <p>Development of machine learning and deep learning models</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -966,18 +966,18 @@ with tab1:
                 <div class="card-icon">💾</div>
                 <h3>Big Data</h3>
             </div>
-            <p>Traitement et analyse de volumes massifs de données</p>
+            <p>Processing and analysis of massive data volumes</p>
         </div>
         """, unsafe_allow_html=True)
     
     # Graphique des compétences
-    st.subheader("📊 Vue d'ensemble des Compétences")
+    st.subheader("📊 Skills Overview")
     skill_chart = create_skill_chart(PORTFOLIO_DATA["skills"]["programming"])
     st.plotly_chart(skill_chart, use_container_width=True)
 
 # ===== TAB 2: ÉDUCATION =====
 with tab2:
-    st.header("🎓 Parcours Académique")
+    st.header("🎓 Academic Background")
     
     for i, education in enumerate(PORTFOLIO_DATA["education"]):
         st.markdown(f"""
@@ -995,15 +995,15 @@ with tab2:
 
 # ===== TAB 3: EXPÉRIENCE =====
 with tab3:
-    st.header("💼 Expérience Professionnelle")
+    st.header("💼 Professional Experience")
     
     for experience in PORTFOLIO_DATA["experience"]:
         with st.expander(f"💼 {experience['title']} - {experience['company']}"):
             col1, col2 = st.columns([1, 2])
             with col1:
                 st.markdown(f"""
-                **Période:** {experience['period']}  
-                **Entreprise:** {experience['company']}
+                **Period:** {experience['period']}  
+                **Company:** {experience['company']}
                 """)
             with col2:
                 description = clean_text_for_markdown(experience['description'])
@@ -1017,12 +1017,12 @@ with tab3:
 
 # ===== TAB 4: COMPÉTENCES =====
 with tab4:
-    st.header("🚀 Compétences Techniques")
+    st.header("🚀 Technical Skills")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("💻 Langages de Programmation")
+        st.subheader("💻 Programming Languages")
         for skill, level in PORTFOLIO_DATA["skills"]["programming"].items():
             st.markdown(f"""
             <div class="skill-container">
@@ -1036,7 +1036,7 @@ with tab4:
             </div>
             """, unsafe_allow_html=True)
         
-        st.subheader("🗄️ Bases de Données")
+        st.subheader("🗄️ Databases")
         for skill, level in PORTFOLIO_DATA["skills"]["databases"].items():
             st.markdown(f"""
             <div class="skill-container">
@@ -1051,7 +1051,7 @@ with tab4:
             """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("🛠️ Outils & Technologies")
+        st.subheader("🛠️ Tools & Technologies")
         for skill, level in PORTFOLIO_DATA["skills"]["tools"].items():
             st.markdown(f"""
             <div class="skill-container">
@@ -1067,13 +1067,13 @@ with tab4:
         
         st.subheader("🎯 Soft Skills")
         soft_skills = [
-            "Résolution de problèmes",
-            "Travail d'équipe",
-            "Communication efficace",
-            "Gestion du temps",
-            "Esprit d'analyse",
-            "Créativité",
-            "Apprentissage continu"
+            "Problem solving",
+            "Teamwork",
+            "Effective communication",
+            "Time management",
+            "Analytical thinking",
+            "Creativity",
+            "Continuous learning"
         ]
         
         for skill in soft_skills:
@@ -1081,19 +1081,19 @@ with tab4:
 
 # ===== TAB 5: PROJETS =====
 with tab5:
-    st.header("📂 Projets Réalisés")
+    st.header("📂 Completed Projects")
     
     # Filtres de projets
     col1, col2 = st.columns([1, 3])
     with col1:
         category_filter = st.selectbox(
-            "Filtrer par catégorie",
-            ["Tous", "AI/ML", "Data Science", "Computer Vision", "Recommendation Systems","Big Data"]
+            "Filter by category",
+            ["All", "AI/ML", "Data Science", "Computer Vision", "Recommendation Systems","Big Data"]
         )
     
     # Affichage des projets
     filtered_projects = PORTFOLIO_DATA["projects"]
-    if category_filter != "Tous":
+    if category_filter != "All":
         filtered_projects = [p for p in PORTFOLIO_DATA["projects"] if category_filter in p["category"]]
     
     for project in filtered_projects:
@@ -1112,13 +1112,13 @@ with tab5:
                 safe_markdown(f"""
                 **Description:** {description}
                 
-                **Catégorie:** {category}
+                **Category:** {category}
                 
                 **Technologies:** {technologies}
                 """)
             
             # Section vidéo de démonstration
-            st.markdown("### 🎬 Démonstration Vidéo")
+            st.markdown("### 🎬 Video Demonstration")
             video_path = get_video_path(project["title"])
             display_project_video(video_path)
 
@@ -1137,29 +1137,29 @@ with tab6:
             
             with col2:
                 st.markdown(f"""
-                **Émetteur:** {cert['issuer']}  
+                **Issuer:** {cert['issuer']}  
                 **Date:** {cert['date']}
                 
-                **[Voir certification]({cert['link']})**
+                **[View certification]({cert['link']})**
                 """)
 
 # ===== TAB 7: CONTACT =====
 with tab7:
-    st.header("📩 Contactez-moi")
+    st.header("📩 Contact Me")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("📞 Informations de Contact")
+        st.subheader("📞 Contact Information")
         st.markdown(f"""
         <div class="contact-info">
             <p>📧 <strong>Email:</strong> {PORTFOLIO_DATA['personal']['email']}</p>
-            <p>📞 <strong>Téléphone:</strong> {PORTFOLIO_DATA['personal']['phone']}</p>
-            <p>📍 <strong>Adresse:</strong> {PORTFOLIO_DATA['personal']['address']}</p>
+            <p>📞 <strong>Phone:</strong> {PORTFOLIO_DATA['personal']['phone']}</p>
+            <p>📍 <strong>Address:</strong> {PORTFOLIO_DATA['personal']['address']}</p>
         </div>
         """, unsafe_allow_html=True)
         
-        st.subheader("🔗 Réseaux Sociaux")
+        st.subheader("🔗 Social Networks")
         st.markdown(f"""
         <div class="social-icons">
             <a href="{PORTFOLIO_DATA['personal']['linkedin']}" target="_blank">
@@ -1172,14 +1172,14 @@ with tab7:
         """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("💬 Envoyez un Message")
+        st.subheader("💬 Send a Message")
         contact_form = f"""
         <form action="https://formsubmit.co/{PORTFOLIO_DATA['personal']['email']}" method="POST" class="contact-form">
             <input type="hidden" name="_captcha" value="false">
-            <input type="text" name="name" placeholder="Votre nom" required>
-            <input type="email" name="email" placeholder="Votre email" required>
-            <textarea name="message" placeholder="Votre message" required></textarea>
-            <button type="submit">📤 Envoyer</button>
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="email" name="email" placeholder="Your email" required>
+            <textarea name="message" placeholder="Your message" required></textarea>
+            <button type="submit">📤 Send</button>
         </form>
         """
         st.markdown(contact_form, unsafe_allow_html=True)
@@ -1187,8 +1187,8 @@ with tab7:
 # ===== FOOTER =====
 st.markdown("""
 <footer>
-    <p>© 2025 Michel Sagesse Kolié - Tous droits réservés</p>
-    <p>Dernière mise à jour: """ + datetime.now().strftime("%B %Y") + """</p>
+    <p>© 2025 Michel Sagesse Kolié - All rights reserved</p>
+    <p>Last updated: """ + datetime.now().strftime("%B %Y") + """</p>
 </footer>
 """, unsafe_allow_html=True)
 
